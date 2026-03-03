@@ -1,0 +1,43 @@
+name: Environment Pipelines 
+
+on: 
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "This is environment specific pipeline"
+        required: true
+        default: dev
+        type: choice
+        options:
+          - dev
+          - prod
+
+jobs:
+
+  code:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code Cloning to server
+        uses: actions/checkout@v4
+
+  build:
+    needs: code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Building the docker image
+        run: echo "Docker image created for ${{ github.event.inputs.environment }} environment"
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Testing in progress
+        run: echo "Tested successfully in ${{ github.event.inputs.environment }}"
+
+  deploy:
+    if: inputs.environment == 'dev'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deployment step
+        run: echo "Deploying to ${{ github.event.inputs.environment }} environment"
